@@ -11,8 +11,8 @@
   #hud{position:fixed;top:12px;left:12px;display:flex;gap:10px;align-items:center;z-index:5;pointer-events:none;}
   .pill{background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:7px 13px;font-size:14px;font-weight:bold;display:flex;align-items:center;gap:7px;backdrop-filter:blur(4px);}
   .flag{width:26px;height:18px;border-radius:3px;overflow:hidden;display:inline-block;border:1px solid rgba(255,255,255,.25);position:relative;}
-  #fsBtn,#camBtn,#faceBtn{position:fixed;top:12px;z-index:5;background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:10px;padding:7px 11px;font-size:14px;cursor:pointer;}
-  #fsBtn{right:12px;} #camBtn{right:64px;} #faceBtn{right:118px;}
+  #fsBtn,#camBtn{position:fixed;top:12px;z-index:5;background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:10px;padding:7px 11px;font-size:14px;cursor:pointer;}
+  #fsBtn{right:12px;} #camBtn{right:64px;}
   #cross{position:fixed;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:rgba(255,255,255,.5);box-shadow:0 0 0 2px rgba(0,0,0,.25);z-index:4;display:none;pointer-events:none;}
   #dialogue{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(700px,92vw);background:rgba(8,12,24,.92);border:2px solid rgba(255,255,255,.2);border-radius:16px;padding:16px 18px;z-index:8;display:none;box-shadow:0 14px 40px rgba(0,0,0,.6);}
   #dialogue .who{font-size:13px;font-weight:bold;color:#9ad;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
@@ -50,10 +50,8 @@
 <canvas id="c"></canvas>
 <div id="cross"></div>
 <div id="hud"><div class="pill"><span class="flag" id="flagHud"></span><span id="cash">$ 0</span> ARS</div><div class="pill">🌿 <span id="fruCount">0</span> FRU</div></div>
-<button id="faceBtn" title="Poné tu cara">📷 Cara</button>
 <button id="camBtn" title="Cámara (V)">👁 1ª</button>
 <button id="fsBtn" title="Pantalla completa (F)">⛶</button>
-<input type="file" id="faceInput" accept="image/*" hidden>
 <div id="prompt">E · preguntá por FRU 🌿</div>
 <div id="dialogue"><div class="who" id="dWho">FRU MAN</div><div class="txt" id="dTxt"></div><div class="hint">[ESPACIO / E / click] continuar</div></div>
 <div id="shop"><div id="shopCard">
@@ -66,7 +64,7 @@
 <div id="touch"><div id="stick"><div id="nub"></div></div><button id="actBtn">HABLAR</button></div>
 <div id="start"><h1>Jueguito<span>Fru</span> 🌿</h1>
   <p>Una calle arbolada de Buenos Aires en otoño. Caminá por la vereda hasta el <b>banco de cemento</b> donde está el <b>FRU MAN</b> y preguntale si te vende un poco de <b>FRU</b>. Pagás en pesos 🇦🇷.</p>
-  <div class="keys">🖱️ Click para mirar · <b>WASD</b> moverte · <b>E</b> hablar · <b>V</b> cámara · <b>📷 Cara</b> poné tu foto · <b>F</b> fullscreen</div>
+  <div class="keys">🖱️ Click para mirar · <b>WASD</b> moverte · <b>E</b> hablar · <b>V</b> cámara · <b>Shift</b> correr · <b>F</b> fullscreen</div>
   <button id="playBtn">▶ Entrar</button></div>
 <div id="loading">cargando la calle… 🍂</div>
 
@@ -254,13 +252,19 @@ makeCar(-7,6.1,0x33373d,false); makeCar(0.5,6.1,0x9aa0a6,false); makeCar(9,6.1,0
 function makeLamp(x,z){ const g=new THREE.Group(); g.position.set(x,hillH(z),z); const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.1,4,8),new THREE.MeshStandardMaterial({color:0x1f4d2a,roughness:0.6})); pole.position.y=2; pole.castShadow=true; g.add(pole); const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.2,12,12),new THREE.MeshStandardMaterial({color:0xfff0c0,emissive:0xffd070,emissiveIntensity:1.5})); bulb.position.y=4; g.add(bulb); const pl=new THREE.PointLight(0xffd070,7,13,2); pl.position.set(0,4,0); g.add(pl); scene.add(g); addCol(x,z,0.2,0.2); }
 makeLamp(-11,-2.9); makeLamp(12,-2.9);
 
-/* ===== cara: registro + carga desde archivo (📷) ===== */
-const faceMaterials=[];
-function maskFace(img){ const c=document.createElement('canvas'); c.width=c.height=256; const x=c.getContext('2d'); const s=Math.max(256/img.width,256/img.height); const w=img.width*s,h=img.height*s; x.drawImage(img,(256-w)/2,(256-h)/2-12,w,h); x.globalCompositeOperation='destination-in'; x.save(); x.translate(128,128); x.scale(0.86,1.06); const g=x.createRadialGradient(0,-6,38,0,0,120); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(0.72,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(-128,-128,256,256); x.restore(); x.globalCompositeOperation='source-over'; const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t; }
-function applyFace(tex){ faceMaterials.forEach(m=>{ m.map=tex; m.transparent=true; m.needsUpdate=true; }); }
-$('#faceBtn').onclick=()=>$('#faceInput').click();
-$('#faceInput').onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{localStorage.setItem('fruFace',r.result);}catch(_){} const img=new Image(); img.onload=()=>{ applyFace(maskFace(img)); toast('¡Cara cargada! 😎'); }; img.src=r.result; }; r.readAsDataURL(f); };
-(function loadSavedFace(){ let saved=null; try{saved=localStorage.getItem('fruFace');}catch(_){} if(saved){ const img=new Image(); img.onload=()=>applyFace(maskFace(img)); img.src=saved; } else { new THREE.TextureLoader().load('assets/face.jpg',tx=>{ tx.colorSpace=THREE.SRGBColorSpace; applyFace(tx); },undefined,()=>{}); } })();
+/* ===== cara real (recortada de la foto) mapeada sobre cabeza curva ===== */
+const faceMaterials=[]; let FACE_TEX=null;
+// geometría de cara curva (bulto hacia adelante) -> el rostro se envuelve en la cabeza
+function curvedFaceGeo(){ const geo=new THREE.PlaneGeometry(0.48,0.56,30,30); const p=geo.attributes.position; for(let i=0;i<p.count;i++){ const x=p.getX(i),y=p.getY(i); const nx=x/0.24,ny=y/0.28; const z=0.14*Math.max(0,(1-nx*nx))*Math.max(0,(1-ny*ny*0.55)); p.setZ(i,z); } geo.computeVertexNormals(); return geo; }
+const FACE_GEO=curvedFaceGeo();
+(function loadRealFace(){ const img=new Image();
+  img.onload=()=>{ const c=document.createElement('canvas'); c.width=c.height=512; const x=c.getContext('2d'); x.drawImage(img,0,0,512,512);
+    // desvanecer el fondo de las esquinas -> sólo cara+pelo, se funde con la cabeza
+    x.globalCompositeOperation='destination-in'; x.save(); x.translate(256,248); x.scale(0.93,1.12);
+    const g=x.createRadialGradient(0,-12,96,0,0,252); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(0.64,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g; x.fillRect(-256,-256,512,512); x.restore(); x.globalCompositeOperation='source-over';
+    const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; FACE_TEX=t; faceMaterials.forEach(m=>{ m.map=t; m.needsUpdate=true; }); };
+  img.onerror=()=>{}; img.src='assets/face.jpg'; })();
 
 /* ===== personajes ===== */
 function buildCharacter({jacket=0xef6a16,sitting=false}={}){ const g=new THREE.Group();
@@ -269,12 +273,15 @@ function buildCharacter({jacket=0xef6a16,sitting=false}={}){ const g=new THREE.G
   const armGeo=new THREE.CapsuleGeometry(0.095,0.52,4,8); const armL=new THREE.Mesh(armGeo,jk),armR=new THREE.Mesh(armGeo,jk); armL.castShadow=armR.castShadow=true; g.add(armL,armR);
   const legGeo=new THREE.CapsuleGeometry(0.12,0.56,4,8); const legL=new THREE.Mesh(legGeo,jeans),legR=new THREE.Mesh(legGeo,jeans); legL.castShadow=legR.castShadow=true; g.add(legL,legR);
   const shoeGeo=new THREE.BoxGeometry(0.17,0.11,0.34); const shoeL=new THREE.Mesh(shoeGeo,dark),shoeR=new THREE.Mesh(shoeGeo,dark); g.add(shoeL,shoeR);
-  const head=new THREE.Mesh(new THREE.SphereGeometry(0.25,28,28),skin); head.castShadow=true; g.add(head);
-  const fmat=new THREE.MeshStandardMaterial({map:faceTex(),roughness:0.6,transparent:true}); faceMaterials.push(fmat);
-  const face=new THREE.Mesh(new THREE.PlaneGeometry(0.42,0.46),fmat); g.add(face);
-  const hairG=new THREE.Group(); for(let i=0;i<46;i++){ const s=0.05+Math.random()*0.055; const m=new THREE.Mesh(new THREE.SphereGeometry(s,8,8),hairMat); const a=Math.random()*Math.PI*2,b=Math.random()*Math.PI*0.66,R=0.25; m.position.set(Math.sin(b)*Math.cos(a)*R,Math.cos(b)*R,Math.sin(b)*Math.sin(a)*R-0.03); if(m.position.y>-0.05&&m.position.z<0.17) hairG.add(m); } head.add(hairG); hairG.position.y=0.02;
-  if(sitting){ torso.position.set(0,0.98,0); head.position.set(0,1.46,0.03); face.position.set(0,1.46,0.245); armL.position.set(-0.35,0.98,0.06); armR.position.set(0.35,0.98,0.06); armL.rotation.x=armR.rotation.x=0.5; legL.rotation.x=legR.rotation.x=-Math.PI/2; legL.position.set(-0.15,0.5,0.32); legR.position.set(0.15,0.5,0.32); const shinL=new THREE.Mesh(legGeo,jeans),shinR=new THREE.Mesh(legGeo,jeans); g.add(shinL,shinR); shinL.position.set(-0.15,0.27,0.6); shinR.position.set(0.15,0.27,0.6); shoeL.position.set(-0.15,0.06,0.76); shoeR.position.set(0.15,0.06,0.76);
-  } else { torso.position.set(0,1.18,0); head.position.set(0,1.66,0.03); face.position.set(0,1.66,0.245); armL.position.set(-0.37,1.16,0); armR.position.set(0.37,1.16,0); legL.position.set(-0.15,0.5,0); legR.position.set(0.15,0.5,0); shoeL.position.set(-0.15,0.06,0.06); shoeR.position.set(0.15,0.06,0.06); }
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.25,40,40),skin); head.scale.set(0.95,1.08,0.97); head.castShadow=true; g.add(head);
+  const fmat=new THREE.MeshStandardMaterial({map:FACE_TEX||faceTex(),roughness:0.62,transparent:true}); faceMaterials.push(fmat);
+  const face=new THREE.Mesh(FACE_GEO,fmat); face.renderOrder=1; g.add(face);
+  // pelo rulo voluminoso (arriba/atrás/costados), dejando la cara libre
+  const hairG=new THREE.Group();
+  for(let i=0;i<78;i++){ const s=0.045+Math.random()*0.06; const m=new THREE.Mesh(new THREE.SphereGeometry(s,8,8),hairMat); const a=Math.random()*Math.PI*2,b=Math.random()*Math.PI*0.78,R=0.255; const px=Math.sin(b)*Math.cos(a)*R, py=Math.cos(b)*R, pz=Math.sin(b)*Math.sin(a)*R; if(py>-0.04 && !(pz>0.10 && py<0.16)){ m.position.set(px,py*1.1+0.02,pz); hairG.add(m); } }
+  head.add(hairG);
+  if(sitting){ torso.position.set(0,0.98,0); head.position.set(0,1.46,0.03); face.position.set(0,1.47,0.17); armL.position.set(-0.35,0.98,0.06); armR.position.set(0.35,0.98,0.06); armL.rotation.x=armR.rotation.x=0.5; legL.rotation.x=legR.rotation.x=-Math.PI/2; legL.position.set(-0.15,0.5,0.32); legR.position.set(0.15,0.5,0.32); const shinL=new THREE.Mesh(legGeo,jeans),shinR=new THREE.Mesh(legGeo,jeans); g.add(shinL,shinR); shinL.position.set(-0.15,0.27,0.6); shinR.position.set(0.15,0.27,0.6); shoeL.position.set(-0.15,0.06,0.76); shoeR.position.set(0.15,0.06,0.76);
+  } else { torso.position.set(0,1.18,0); head.position.set(0,1.66,0.03); face.position.set(0,1.67,0.17); armL.position.set(-0.37,1.16,0); armR.position.set(0.37,1.16,0); legL.position.set(-0.15,0.5,0); legR.position.set(0.15,0.5,0); shoeL.position.set(-0.15,0.06,0.06); shoeR.position.set(0.15,0.06,0.06); }
   return g; }
 const fruman=buildCharacter({jacket:0xef6a16,sitting:true}); fruman.position.copy(benchPos); fruman.position.y=0; fruman.rotation.y=Math.PI-0.06; scene.add(fruman);
 const playerAvatar=buildCharacter({jacket:0x5a2540}); scene.add(playerAvatar);
