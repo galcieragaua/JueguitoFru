@@ -1,48 +1,44 @@
-# JueguitoFru 🌿
+# JueguitoFru 🌿 (3D)
 
-Mini-juego web interactivo ambientado en una **plaza de Buenos Aires de día**
-(Juez Tedín, a la vuelta del MALBA / Alcorta), con estética **pixel-art** y a
-**pantalla completa**. Controlás al pibe de los rulos, caminás por la vereda hasta
-el **banco de cemento** donde está sentado el **FRU MAN** y le preguntás si te vende
-un poco de **FRU** 🌿 (una plantita verde con forma de hoja de maple canadiense, pero
-verde). Comprás y vendés con **pesos argentinos (ARS)** y la banderita de Argentina.
+Juego web **3D** ambientado en una plaza de Buenos Aires. Controlás al pibe de los
+rulos en **primera persona**, caminás hasta el **banco de cemento** donde está el
+**FRU MAN** y le preguntás si te vende un poco de **FRU** 🌿. Pagás en **pesos
+argentinos (ARS)** 🇦🇷. Hecho con **Three.js**, árboles frondosos (miles de hojas
+instanciadas), sombras suaves y bloom para una vibe casi ray-traced.
 
-## 🎮 Jugar online
+## 🎮 Jugar
 
-Una vez activado GitHub Pages (ver abajo), el juego queda en:
+Abrí el link de GitHub Pages (cuando esté activado), o serví la carpeta local.
+Necesita internet para cargar Three.js desde el CDN.
 
-> **https://galcieragaua.github.io/JueguitoFru/**
+### Controles
+- **Click** en la pantalla → mirar (primera persona, mouse look)
+- **WASD / flechas** → moverte · **Shift** → correr
+- **E / Espacio** → hablar con el FRU MAN / confirmar
+- **V** → cambiar entre 1ª y 3ª persona
+- **F** → pantalla completa · **Esc** → soltar el mouse
+- 📱 joystick + arrastrar para mirar + botón HABLAR
 
-### Activar GitHub Pages (una sola vez)
+## Cara realista (opcional)
 
-1. Andá a **Settings → Pages** del repo en GitHub.
-2. En **Build and deployment → Source**, elegí **GitHub Actions**.
-3. Listo. Cada push a la branch corre el workflow y publica el juego en la URL de arriba.
-   (Podés forzar el deploy desde **Actions → Deploy JueguitoFru to GitHub Pages → Run workflow**.)
+Los personajes usan una cara estilizada por defecto. Si querés la **cara real**
+foto-realista, subí un **primer plano de frente** como archivo en:
 
-> Mientras tanto, también podés abrirlo al toque sin configurar nada con
-> [htmlpreview](https://htmlpreview.github.io/?https://raw.githubusercontent.com/galcieragaua/JueguitoFru/claude/hopeful-franklin-dqonn/index.html).
+```
+assets/face.jpg
+```
 
-## Controles
-
-- **Moverte:** `WASD` o flechas (celular: joystick en pantalla)
-- **Hablar / Confirmar:** `E` o `Espacio` (celular: botón `HABLAR`)
-- **Pantalla completa:** botón `⛶` arriba a la derecha, o tecla `F`
-- Acercate al FRU MAN, hablale y se abre el **puesto de FRU** para comprar/vender.
+El juego la detecta y la mapea como textura sobre la cara automáticamente.
+> Importante: tiene que ser un **archivo** (`assets/face.jpg`), no una imagen
+> pegada en el chat.
 
 ## Detalles
+- Música: tu track real `assets/track.mp3` (arranca al hablar con el FRU MAN).
+- Mumbles del FRU MAN + moneditas al comprar/vender (Web Audio API).
+- Compra/venta de FRU en ARS con banderita argentina.
+- Todo en un solo `index.html` (Three.js por CDN).
 
-- **Todo en un solo archivo** (`index.html`), sin dependencias.
-- Render **pixel-art adaptativo**: llena toda la pantalla (16:10 de la MacBook 14" incluido).
-- **Música:** tu track real `assets/track.mp3` (suena en loop cuando hablás con el FRU MAN).
-- **Mumbles** (la voz "blablah" del FRU MAN), + moneditas al comprar/vender (Web Audio API).
-- Diálogos en **español rioplatense**.
-- Ambiente inspirado en las fotos: loma de pasto, árboles grandes, hiedra, farol verde,
-  vereda de cemento, calle (Juez Tedín) y el banco de cemento donde se sienta el FRU MAN.
-
-## Correr localmente
-
+## Local
 ```bash
-# servir la carpeta (recomendado, para que cargue el mp3):
-python3 -m http.server 8000   # y entrá a http://localhost:8000
+python3 -m http.server 8000   # http://localhost:8000
 ```
