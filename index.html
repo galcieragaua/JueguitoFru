@@ -120,6 +120,16 @@
 </div>
 <div id="loading">cargando la plaza… 🌳</div>
 
+<script>
+/* salvavidas: si el motor 3D no arranca (p.ej. htmlpreview, que no ejecuta
+   modulos JS), no dejamos el loading colgado para siempre. */
+window.__fruReady=false;
+window.addEventListener('error',e=>{ if(window.__fruReady)return; const l=document.getElementById('loading');
+  if(l) l.innerHTML='⚠️ Error al cargar el 3D:<br><small style="opacity:.8">'+((e&&e.message)||'desconocido')+'</small><br><br><small>Abrilo desde GitHub Pages o el link de Vercel — htmlpreview no soporta este juego.</small>'; });
+setTimeout(()=>{ if(window.__fruReady)return; const l=document.getElementById('loading');
+  if(l) l.innerHTML='⏳ No se pudo iniciar el motor 3D.<br><br><small>Casi seguro estás usando <b>htmlpreview</b>, que no ejecuta módulos JS.<br>Abrilo desde <b>GitHub Pages</b> o el <b>link de Vercel</b> y va a andar.</small>'; },12000);
+</script>
+
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -558,6 +568,7 @@ $('#fsBtn').onclick=toggleFs;
 $('#playBtn').onclick=()=>{ AudioFX.init(); state.started=true; $('#start').style.display='none'; if(view==='fp') $('#c').requestPointerLock(); };
 
 // arrancar render apenas carga (muestra la plaza detrás del menú)
+window.__fruReady=true;
 $('#loading').style.display='none';
 animate();
 </script>
