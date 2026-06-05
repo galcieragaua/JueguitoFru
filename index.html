@@ -5,24 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>JueguitoFru 🌿</title>
 <style>
-  :root{
-    --ars-blue:#75AADB;
-    --leaf:#2fbf4f;
-  }
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;background:#0a0d18;overflow:hidden;font-family:'Trebuchet MS',system-ui,sans-serif;color:#fff;}
-  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
-  canvas{image-rendering:pixelated;background:#0a0d18;touch-action:none;max-width:100%;max-height:100%;}
+  #game{position:fixed;inset:0;width:100vw;height:100vh;display:block;
+    image-rendering:pixelated;image-rendering:crisp-edges;background:#bcd;}
 
   /* ---- HUD ---- */
-  #hud{position:fixed;top:10px;left:10px;display:flex;gap:10px;align-items:center;z-index:5;pointer-events:none;}
-  .pill{background:rgba(8,12,24,.78);border:1px solid rgba(255,255,255,.14);border-radius:999px;
+  #hud{position:fixed;top:12px;left:12px;display:flex;gap:10px;align-items:center;z-index:5;pointer-events:none;}
+  .pill{background:rgba(8,12,24,.78);border:1px solid rgba(255,255,255,.16);border-radius:999px;
     padding:7px 13px;font-size:14px;font-weight:bold;display:flex;align-items:center;gap:7px;backdrop-filter:blur(4px);}
   .flag{width:26px;height:18px;border-radius:3px;overflow:hidden;display:inline-block;border:1px solid rgba(255,255,255,.25);}
+  #fsBtn{position:fixed;top:12px;right:12px;z-index:5;background:rgba(8,12,24,.78);border:1px solid rgba(255,255,255,.16);
+    color:#fff;border-radius:10px;padding:7px 11px;font-size:16px;cursor:pointer;}
 
   /* ---- Dialogue ---- */
-  #dialogue{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:min(680px,92vw);
-    background:rgba(8,12,24,.92);border:2px solid rgba(255,255,255,.18);border-radius:16px;padding:16px 18px;
+  #dialogue{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(700px,92vw);
+    background:rgba(8,12,24,.92);border:2px solid rgba(255,255,255,.2);border-radius:16px;padding:16px 18px;
     z-index:8;display:none;box-shadow:0 14px 40px rgba(0,0,0,.6);}
   #dialogue .who{font-size:13px;font-weight:bold;color:#9ad;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
   #dialogue .txt{font-size:18px;line-height:1.5;min-height:54px;}
@@ -43,23 +41,21 @@
   button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;padding:10px 16px;font-weight:bold;
     font-size:15px;transition:transform .06s ease, filter .15s;}
   button:active{transform:scale(.94);}
-  .buy{background:var(--leaf);color:#04220c;}
+  .buy{background:#2fbf4f;color:#04220c;}
   .sell{background:#ffb13b;color:#3a2200;}
   .close{display:block;width:100%;margin-top:6px;background:rgba(255,255,255,.1);color:#fff;}
   .qty{font-size:34px;font-weight:bold;}
-  #toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(8,12,24,.95);
+  #toast{position:fixed;top:62px;left:50%;transform:translateX(-50%);background:rgba(8,12,24,.95);
     border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:9px 16px;font-size:14px;z-index:12;display:none;}
 
   /* ---- Start overlay ---- */
   #start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:radial-gradient(circle at 50% 30%,#1a2238,#070912);text-align:center;padding:24px;}
-  #start h1{font-size:clamp(34px,8vw,64px);letter-spacing:2px;margin-bottom:6px;
-    text-shadow:0 0 24px rgba(47,191,79,.5);}
-  #start h1 span{color:var(--leaf);}
-  #start p{opacity:.8;max-width:480px;line-height:1.6;margin-bottom:8px;font-size:15px;}
+  #start h1{font-size:clamp(34px,8vw,64px);letter-spacing:2px;margin-bottom:6px;text-shadow:0 0 24px rgba(47,191,79,.5);}
+  #start h1 span{color:#2fbf4f;}
+  #start p{opacity:.85;max-width:500px;line-height:1.6;margin-bottom:8px;font-size:15px;}
   #start .keys{opacity:.6;font-size:13px;margin:14px 0 22px;}
-  #playBtn{background:var(--leaf);color:#04220c;font-size:20px;padding:14px 34px;border-radius:14px;
-    box-shadow:0 0 30px rgba(47,191,79,.45);}
+  #playBtn{background:#2fbf4f;color:#04220c;font-size:20px;padding:14px 34px;border-radius:14px;box-shadow:0 0 30px rgba(47,191,79,.45);}
 
   /* ---- Mobile controls ---- */
   #touch{position:fixed;inset:0;z-index:6;pointer-events:none;display:none;}
@@ -73,12 +69,13 @@
 </style>
 </head>
 <body>
-<div id="wrap"><canvas id="game" width="960" height="640"></canvas></div>
+<canvas id="game"></canvas>
 
 <div id="hud">
   <div class="pill"><span class="flag" id="flagHud"></span><span id="cash">$ 0</span> ARS</div>
   <div class="pill">🌿 <span id="fruCount">0</span> FRU</div>
 </div>
+<button id="fsBtn" title="Pantalla completa">⛶</button>
 
 <div id="dialogue">
   <div class="who" id="dWho">FRU MAN</div>
@@ -89,7 +86,7 @@
 <div id="shop">
   <div id="shopCard">
     <h2><span class="flag" id="flagShop"></span> Puesto de FRU</h2>
-    <div class="sub">Mercadito clandestino de la terraza · precios en ARS</div>
+    <div class="sub">Mercadito de la plaza · precios en ARS</div>
     <div class="row">
       <div class="info">
         <canvas id="leafIcon" width="46" height="46"></canvas>
@@ -117,214 +114,161 @@
 
 <div id="start">
   <h1>Jueguito<span>Fru</span> 🌿</h1>
-  <p>Sos el pibe de los rulos en una terraza de Buenos Aires, de noche. Caminá hasta el banco de cemento donde está sentado el <b>FRU MAN</b> y preguntale si te vende un poco de <b>FRU</b>.</p>
+  <p>Sos el pibe de los rulos en una plaza de Buenos Aires (Juez Tedín, a la vuelta del MALBA). Caminá hasta el <b>banco de cemento</b> donde está sentado el <b>FRU MAN</b> y preguntale si te vende un poco de <b>FRU</b>.</p>
   <div class="keys">⌨️ Moverte: <b>WASD / Flechas</b> &nbsp;·&nbsp; Hablar / Confirmar: <b>E / Espacio</b> &nbsp;·&nbsp; 📱 joystick + botón</div>
   <button id="playBtn">▶ Empezar</button>
-  <p style="font-size:12px;opacity:.5;margin-top:18px;">La música arranca al hablar con el FRU MAN. (Tip: poné tu track en <code>assets/track.mp3</code> y se usa solo.)</p>
+  <p style="font-size:12px;opacity:.5;margin-top:18px;">La música arranca cuando hablás con el FRU MAN. 🎧</p>
 </div>
 
 <script>
 "use strict";
 /* =========================================================================
-   JueguitoFru — terraza nocturna de Buenos Aires, comprá FRU al FRU MAN.
-   Todo en un archivo, sin dependencias. Gráficos y audio procedurales.
+   JueguitoFru — plaza diurna de Buenos Aires (Juez Tedín). Comprá FRU al FRU MAN.
+   Un solo archivo. Render pixelado adaptativo a pantalla completa.
    ========================================================================= */
 const cv = document.getElementById('game');
 const ctx = cv.getContext('2d');
-const W = cv.width, H = cv.height;
+ctx.imageSmoothingEnabled = false;
+
+/* Resolución interna fija en altura (look pixel-art), ancho según pantalla */
+const BASE_H = 360;
+let VW = 640, VH = BASE_H;
+function fit(){
+  const aspect = Math.max(1.2, window.innerWidth/window.innerHeight);
+  VH = BASE_H;
+  VW = Math.round(BASE_H*aspect);
+  cv.width = VW; cv.height = VH;
+  ctx.imageSmoothingEnabled = false;
+  layout();
+}
+addEventListener('resize', fit);
 
 /* ---------- estado ---------- */
-const state = {
-  cash: 12000,
-  fru: 0,
-  buyPrice: 3500,
-  sellPrice: 2600,
-  started: false,
-  talking: false,
-};
+const state = { cash:12000, fru:0, buyPrice:3500, sellPrice:2600, started:false, talking:false };
 
-/* ---------- jugador y NPC ---------- */
-const player = { x: 230, y: 470, w: 30, h: 54, speed: 2.6, dir: 1, walk: 0, facing: 1 };
-// El FRU MAN está sentado en el banco de cemento (centro-derecha)
-const fruman = { x: 600, y: 392, w: 34, h: 46 };
-const benchZone = { x: 470, y: 360, w: 300, h: 150 }; // cantero/banco de cemento
+/* ---------- jugador / NPC / banco (posiciones se calculan en layout) ---------- */
+const player = { x:120, y:250, w:22, h:40, speed:1.7, facing:1, walk:0 };
+const fruman = { x:380, y:230, w:22, h:34 };
+const bench  = { x:360, y:248, w:120, h:42 };   // banco de cemento (losa + patas)
+function layout(){
+  bench.w = 120; bench.h = 42;
+  bench.x = Math.round(VW*0.60);
+  bench.y = Math.round(VH*0.66);
+  fruman.x = bench.x + 34;
+  fruman.y = bench.y - 30;
+  if(!state.started){
+    player.x = Math.round(VW*0.18);
+    player.y = Math.round(VH*0.74);
+  }
+}
 
 /* ---------- input ---------- */
 const keys = {};
 let touchVec = {x:0,y:0};
 addEventListener('keydown', e=>{
-  keys[e.key.toLowerCase()] = true;
-  if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase())) e.preventDefault();
-  if((e.key===' '||e.key.toLowerCase()==='e')) onAction();
+  const k=e.key.toLowerCase();
+  keys[k]=true;
+  if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k)) e.preventDefault();
+  if(k===' '||k==='e') onAction();
+  if(k==='f') toggleFs();
 });
-addEventListener('keyup', e=> keys[e.key.toLowerCase()] = false);
+addEventListener('keyup', e=> keys[e.key.toLowerCase()]=false);
 
 /* =========================================================================
-   AUDIO — música lofi procedural + mumbles. Si existe assets/track.mp3 se usa.
+   AUDIO — track real (assets/track.mp3) + mumbles + monedas procedurales.
    ========================================================================= */
-const Audio = (()=>{
-  let actx=null, master=null, musicGain=null, started=false, useMp3=false, mp3El=null;
-  let loopTimer=null;
+const AudioFX = (()=>{
+  let actx=null, master=null, started=false, mp3El=null, mp3Ready=false;
+  const MP3_SOURCES = [
+    'assets/track.mp3',
+    'https://raw.githubusercontent.com/galcieragaua/JueguitoFru/claude/hopeful-franklin-dqonn/assets/track.mp3'
+  ];
   function init(){
     if(actx) return;
     actx = new (window.AudioContext||window.webkitAudioContext)();
-    master = actx.createGain(); master.gain.value=0.85; master.connect(actx.destination);
-    musicGain = actx.createGain(); musicGain.gain.value=0.0; musicGain.connect(master);
+    master = actx.createGain(); master.gain.value=0.9; master.connect(actx.destination);
   }
-  // intenta cargar mp3 del usuario
-  function tryMp3(){
-    mp3El = new window.Audio('assets/track.mp3');
-    mp3El.loop=true; mp3El.volume=0.55;
-    mp3El.addEventListener('canplaythrough',()=>{ useMp3=true; }, {once:true});
-    mp3El.addEventListener('error',()=>{ useMp3=false; }, {once:true});
+  function loadMp3(i){
+    i = i||0;
+    if(i>=MP3_SOURCES.length) return;
+    mp3El = new Audio(MP3_SOURCES[i]);
+    mp3El.loop=true; mp3El.preload='auto'; mp3El.volume=0.6;
+    mp3El.addEventListener('canplaythrough',()=>{ mp3Ready=true; },{once:true});
+    mp3El.addEventListener('error',()=>{ mp3Ready=false; loadMp3(i+1); },{once:true});
     mp3El.load();
   }
-  // ---- música procedural (acorde lofi lento) ----
-  const scale=[0,3,5,7,10]; // pentatónica menor
-  const root=220; // A3
-  function note(freq,t,dur,gain,type){
-    const o=actx.createOscillator(), g=actx.createGain();
-    o.type=type||'sine'; o.frequency.value=freq;
-    const f=actx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1400;
-    o.connect(f); f.connect(g); g.connect(musicGain);
-    g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(gain,t+0.04);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.start(t); o.stop(t+dur+0.05);
-  }
-  let step=0;
-  function scheduleLoop(){
-    const t=actx.currentTime+0.05;
-    const beat=0.5;
-    // bajo
-    const bi=[0,0,3,2][step%4];
-    note(root*Math.pow(2,scale[bi]/12)/2, t, beat*1.8, 0.18,'triangle');
-    // acorde/arpegio
-    for(let i=0;i<3;i++){
-      const deg=scale[(step*2+i)%scale.length];
-      note(root*Math.pow(2,deg/12)*(i?2:1), t+i*0.12, 0.9, 0.07,'sine');
-    }
-    // hi-hat ruidito
-    const nb=actx.createBufferSource();
-    const buf=actx.createBuffer(1,actx.sampleRate*0.05,actx.sampleRate);
-    const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);
-    nb.buffer=buf; const hg=actx.createGain(); hg.gain.value=0.05; nb.connect(hg); hg.connect(musicGain); nb.start(t);
-    step++;
-    loopTimer=setTimeout(scheduleLoop, beat*1000);
-  }
   function startMusic(){
-    init();
-    if(actx.state==='suspended') actx.resume();
+    init(); if(actx.state==='suspended') actx.resume();
     if(started) return; started=true;
-    if(useMp3 && mp3El){ mp3El.play().catch(()=>{ proc(); }); }
-    else proc();
-    function proc(){ musicGain.gain.linearRampToValueAtTime(0.9, actx.currentTime+1.5); scheduleLoop(); }
-    if(useMp3) musicGain.gain.value=0; // mp3 maneja su volumen
+    if(mp3El){ mp3El.currentTime=0; mp3El.play().catch(()=>{}); }
   }
-  // ---- MUMBLE: voz "blablah" sin palabras ----
+  // mumble: voz "blablah" sin palabras
   function mumble(seed){
     init(); if(actx.state==='suspended') actx.resume();
-    const t0=actx.currentTime;
+    let t=actx.currentTime;
     const n=3+Math.floor(Math.random()*3);
-    let t=t0;
     for(let i=0;i<n;i++){
       const o=actx.createOscillator(), g=actx.createGain(), f=actx.createBiquadFilter();
       o.type='sawtooth';
       const base=90+Math.random()*60+(seed||0);
       o.frequency.setValueAtTime(base,t);
-      o.frequency.linearRampToValueAtTime(base*(0.7+Math.random()*0.6), t+0.12);
+      o.frequency.linearRampToValueAtTime(base*(0.7+Math.random()*0.6),t+0.12);
       f.type='bandpass'; f.frequency.value=500+Math.random()*900; f.Q.value=6;
       o.connect(f); f.connect(g); g.connect(master);
       const dur=0.09+Math.random()*0.08;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(0.16,t+0.02);
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.14,t+0.02);
       g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-      o.start(t); o.stop(t+dur+0.02);
-      t+=dur+0.03;
+      o.start(t); o.stop(t+dur+0.02); t+=dur+0.03;
     }
   }
-  function blip(){
+  function blip(){ tone(660,0.1,'square'); }
+  function coins(){ [0,0.08,0.16].forEach((dt,i)=>tone(880+i*220,0.18,'square',dt)); }
+  function tone(freq,dur,type,delay){
     init(); if(actx.state==='suspended') actx.resume();
     const o=actx.createOscillator(),g=actx.createGain();
-    o.type='square'; o.frequency.value=660; o.connect(g); g.connect(master);
-    g.gain.setValueAtTime(0.0,actx.currentTime);
-    g.gain.linearRampToValueAtTime(0.1,actx.currentTime+0.01);
-    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.12);
-    o.start(); o.stop(actx.currentTime+0.13);
+    o.type=type; o.frequency.value=freq; o.connect(g); g.connect(master);
+    const t=actx.currentTime+(delay||0);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.1,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.start(t); o.stop(t+dur+0.02);
   }
-  function coins(){
-    init(); if(actx.state==='suspended') actx.resume();
-    [0,0.08,0.16].forEach((dt,i)=>{
-      const o=actx.createOscillator(),g=actx.createGain();
-      o.type='square'; o.frequency.value=880+i*220; o.connect(g); g.connect(master);
-      const t=actx.currentTime+dt;
-      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.12,t+0.01);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
-      o.start(t); o.stop(t+0.2);
-    });
-  }
-  return {init,tryMp3,startMusic,mumble,blip,coins};
+  return {init,loadMp3,startMusic,mumble,blip,coins};
 })();
-Audio.tryMp3();
+AudioFX.loadMp3(0);
 
 /* =========================================================================
    DIÁLOGO
    ========================================================================= */
 const dialogue = {
-  el: document.getElementById('dialogue'),
-  whoEl: document.getElementById('dWho'),
-  txtEl: document.getElementById('dTxt'),
-  queue: [],
-  typing:false,
-  current:'',
-  shown:'',
-  onDone:null,
-  open(lines, onDone){
-    state.talking=true;
-    this.queue = lines.slice();
-    this.onDone = onDone||null;
-    this.el.style.display='block';
-    this.next();
-  },
+  el:document.getElementById('dialogue'), whoEl:document.getElementById('dWho'),
+  txtEl:document.getElementById('dTxt'), queue:[], typing:false, current:'', onDone:null, _t:null,
+  open(lines,onDone){ state.talking=true; this.queue=lines.slice(); this.onDone=onDone||null; this.el.style.display='block'; this.next(); },
   next(){
-    if(this.typing){ // completar línea actual de una
-      this.shown=this.current; this.txtEl.textContent=this.current; this.typing=false; return;
-    }
+    if(this.typing){ this.txtEl.textContent=this.current; this.typing=false; return; }
     if(this.queue.length===0){ this.close(); return; }
     const line=this.queue.shift();
-    this.whoEl.textContent = line.who;
-    this.current=line.txt; this.shown=''; this.typing=true;
+    this.whoEl.textContent=line.who; this.current=line.txt; this.typing=true;
     let i=0;
     const tick=()=>{
-      if(!this.typing){return;}
+      if(!this.typing) return;
       if(i<=this.current.length){
-        this.shown=this.current.slice(0,i);
-        this.txtEl.textContent=this.shown;
-        if(line.who==='FRU MAN' && i%2===0 && this.current[i] && this.current[i]!==' ') Audio.mumble(line.seed||0);
-        else if(i%3===0) Audio.blip();
-        i++;
-        this._t=setTimeout(tick, 38);
-      } else { this.typing=false; }
+        this.txtEl.textContent=this.current.slice(0,i);
+        if(line.who==='FRU MAN' && i%2===0 && this.current[i] && this.current[i]!==' ') AudioFX.mumble(line.seed||0);
+        else if(i%3===0) AudioFX.blip();
+        i++; this._t=setTimeout(tick,38);
+      } else this.typing=false;
     };
     tick();
   },
-  close(){
-    this.el.style.display='none';
-    state.talking=false;
-    clearTimeout(this._t);
-    const cb=this.onDone; this.onDone=null;
-    if(cb) cb();
-  }
+  close(){ this.el.style.display='none'; state.talking=false; clearTimeout(this._t);
+    const cb=this.onDone; this.onDone=null; if(cb) cb(); }
 };
 
 /* =========================================================================
    SHOP
    ========================================================================= */
 const shopEl=document.getElementById('shop');
-function openShop(){
-  shopEl.style.display='flex';
-  refreshShop();
-}
+function openShop(){ shopEl.style.display='flex'; refreshShop(); }
 function closeShop(){ shopEl.style.display='none'; }
 function refreshShop(){
   document.getElementById('shopFru').textContent=state.fru;
@@ -332,30 +276,22 @@ function refreshShop(){
   document.getElementById('sellPrice').textContent=state.sellPrice.toLocaleString('es-AR');
   updateHud();
 }
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.style.display='block';
-  clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.display='none',1600);
-}
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.display='none',1700); }
 document.getElementById('buyBtn').onclick=()=>{
-  if(state.cash>=state.buyPrice){
-    state.cash-=state.buyPrice; state.fru++; Audio.coins();
-    Audio.mumble(20);
-    toast('Compraste 1 FRU 🌿 — “gracias maestro”');
-  } else { Audio.blip(); toast('No te alcanza la guita, rey 💸'); }
+  if(state.cash>=state.buyPrice){ state.cash-=state.buyPrice; state.fru++; AudioFX.coins(); AudioFX.mumble(20);
+    toast('Compraste 1 FRU 🌿 — “gracias maestro”'); }
+  else { AudioFX.blip(); toast('No te alcanza la guita, rey 💸'); }
   refreshShop();
 };
 document.getElementById('sellBtn').onclick=()=>{
-  if(state.fru>0){
-    state.fru--; state.cash+=state.sellPrice; Audio.coins();
-    toast('Vendiste 1 FRU — '+state.sellPrice.toLocaleString('es-AR')+' ARS');
-  } else { Audio.blip(); toast('No tenés FRU para vender 🤷'); }
+  if(state.fru>0){ state.fru--; state.cash+=state.sellPrice; AudioFX.coins();
+    toast('Vendiste 1 FRU — '+state.sellPrice.toLocaleString('es-AR')+' ARS'); }
+  else { AudioFX.blip(); toast('No tenés FRU para vender 🤷'); }
   refreshShop();
 };
-document.getElementById('closeShop').onclick=()=>{
-  closeShop();
-  dialogue.open([{who:'FRU MAN',txt:'Dale campeón, cualquier cosa estoy acá sentado. Cuidate.',seed:8}]);
-};
+document.getElementById('closeShop').onclick=()=>{ closeShop();
+  dialogue.open([{who:'FRU MAN',txt:'Dale campeón, cualquier cosa estoy acá sentado. Cuidate.',seed:8}]); };
 
 /* =========================================================================
    INTERACCIÓN
@@ -363,49 +299,40 @@ document.getElementById('closeShop').onclick=()=>{
 function nearFruMan(){
   const dx=(player.x+player.w/2)-(fruman.x+fruman.w/2);
   const dy=(player.y+player.h/2)-(fruman.y+fruman.h/2);
-  return Math.hypot(dx,dy) < 95;
+  return Math.hypot(dx,dy) < 70;
 }
 let firstTalk=true;
 function onAction(){
   if(!state.started) return;
-  // si hay diálogo abierto -> avanzar
   if(state.talking){ dialogue.next(); return; }
   if(shopEl.style.display==='flex') return;
   if(nearFruMan()){
-    Audio.startMusic();
-    if(firstTalk){
-      firstTalk=false;
+    AudioFX.startMusic();
+    if(firstTalk){ firstTalk=false;
       dialogue.open([
         {who:'VOS',txt:'Eh... ¿qué hacés? ¿Todo bien?'},
-        {who:'FRU MAN',txt:'Hmmblabl... todo tranqui hermano, acá sentadito.',seed:4},
+        {who:'FRU MAN',txt:'Hmmblabl... todo tranqui hermano, acá sentadito al solcito.',seed:4},
         {who:'VOS',txt:'Che, una pregunta... ¿me podés vender un poco de FRU?'},
-        {who:'FRU MAN',txt:'Mmhh... FRU? Claro maestro, del verdecito tengo. Pasá, mirá.',seed:10},
+        {who:'FRU MAN',txt:'Mmhh... ¿FRU? Claro maestro, del verdecito tengo. Pasá, mirá.',seed:10},
       ], openShop);
     } else {
-      dialogue.open([
-        {who:'FRU MAN',txt:'Volviste eh... ¿querés más FRU? Mirá lo que tengo.',seed:6},
-      ], openShop);
+      dialogue.open([{who:'FRU MAN',txt:'Volviste eh... ¿querés más FRU? Mirá lo que tengo.',seed:6}], openShop);
     }
   }
 }
-
-/* botones touch */
 document.getElementById('actBtn').addEventListener('touchstart',e=>{e.preventDefault();onAction();});
 document.getElementById('dialogue').addEventListener('click',()=>{ if(state.talking) dialogue.next(); });
 
 /* joystick */
 (()=>{
   const stick=document.getElementById('stick'), nub=document.getElementById('nub');
-  let active=false, cx=0, cy=0;
-  function setNub(dx,dy){ nub.style.left=(40+dx)+'px'; nub.style.top=(40+dy)+'px'; }
+  let active=false,cx=0,cy=0;
+  const setNub=(dx,dy)=>{nub.style.left=(40+dx)+'px';nub.style.top=(40+dy)+'px';};
   stick.addEventListener('touchstart',e=>{e.preventDefault();active=true;const r=stick.getBoundingClientRect();cx=r.left+r.width/2;cy=r.top+r.height/2;});
-  stick.addEventListener('touchmove',e=>{
-    if(!active)return; e.preventDefault();
-    const t=e.touches[0]; let dx=t.clientX-cx, dy=t.clientY-cy;
-    const m=Math.hypot(dx,dy), max=45; if(m>max){dx=dx/m*max;dy=dy/m*max;}
-    setNub(dx,dy); touchVec.x=dx/max; touchVec.y=dy/max;
-  });
-  function end(e){active=false;touchVec.x=0;touchVec.y=0;setNub(0,0);}
+  stick.addEventListener('touchmove',e=>{ if(!active)return; e.preventDefault();
+    const t=e.touches[0]; let dx=t.clientX-cx,dy=t.clientY-cy; const m=Math.hypot(dx,dy),max=45;
+    if(m>max){dx=dx/m*max;dy=dy/m*max;} setNub(dx,dy); touchVec.x=dx/max; touchVec.y=dy/max; });
+  const end=()=>{active=false;touchVec.x=0;touchVec.y=0;setNub(0,0);};
   stick.addEventListener('touchend',end); stick.addEventListener('touchcancel',end);
 })();
 
@@ -424,283 +351,239 @@ function update(){
     if(m>0.1){
       vx/=Math.max(1,m); vy/=Math.max(1,m);
       const nx=player.x+vx*player.speed, ny=player.y+vy*player.speed;
-      if(!collidesBench(nx,player.y)) player.x=nx;
-      if(!collidesBench(player.x,ny)) player.y=ny;
-      player.x=Math.max(40,Math.min(W-70,player.x));
-      player.y=Math.max(300,Math.min(H-60,player.y));
+      if(!hitsBench(nx,player.y)) player.x=nx;
+      if(!hitsBench(player.x,ny)) player.y=ny;
+      player.x=Math.max(VW*0.03,Math.min(VW*0.94-player.w,player.x));
+      player.y=Math.max(VH*0.58,Math.min(VH*0.88-player.h,player.y));
       if(vx<-0.1)player.facing=-1; if(vx>0.1)player.facing=1;
-      player.walk+=0.25;
+      player.walk+=0.28;
     } else player.walk=0;
   }
 }
-// El cantero de cemento es sólido: no podés pisarlo
-function collidesBench(px,py){
-  const b=benchZone;
-  const cxp=px+player.w/2, cyp=py+player.h-8;
-  return cxp>b.x && cxp<b.x+b.w && cyp>b.y+30 && cyp<b.y+b.h;
+function hitsBench(px,py){
+  const cxp=px+player.w/2, cyp=py+player.h-4;
+  return cxp>bench.x && cxp<bench.x+bench.w && cyp>bench.y+8 && cyp<bench.y+bench.h;
 }
 
 /* =========================================================================
-   RENDER — terraza nocturna de Buenos Aires
+   RENDER — plaza diurna pixelada
    ========================================================================= */
 let t=0;
 function draw(){
   t++;
-  // cielo nocturno (degradé azul como la foto)
-  const sky=ctx.createLinearGradient(0,0,0,H*0.55);
-  sky.addColorStop(0,'#0d1430'); sky.addColorStop(0.6,'#1b2647'); sky.addColorStop(1,'#2a3358');
-  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
-  drawStars();
-  drawSkyline();
-  drawHangingLeaves();
-  drawFloor();
-  drawPlanter();   // cantero de cemento + planta FRU
-  // orden por profundidad simple
-  drawFruMan();
-  drawPlayer();
+  drawSky();
+  drawDistantTrees();
+  drawHill();
+  drawIvyBack();
+  drawSidewalk();
+  drawStreet();
+  drawLamp(VW*0.40, VH*0.55);
+  drawBigTree(VW*0.30, VH*0.60);
+  drawBench();
+  // personajes ordenados por Y (profundidad)
+  const ents=[{y:fruman.y,f:drawFruMan},{y:player.y,f:drawPlayer}];
+  ents.sort((a,b)=>a.y-b.y).forEach(e=>e.f());
+  drawCanopy();
   drawPrompt();
 }
 
-function drawStars(){
+function drawSky(){
+  const g=ctx.createLinearGradient(0,0,0,VH*0.6);
+  g.addColorStop(0,'#a9c7d6'); g.addColorStop(1,'#d9e6e0');
+  ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
+  // nubes suaves
   ctx.fillStyle='rgba(255,255,255,.5)';
-  for(let i=0;i<40;i++){
-    const x=(i*97)%W, y=(i*53)%(H*0.35);
-    const tw=0.4+0.6*Math.abs(Math.sin(t*0.02+i));
-    ctx.globalAlpha=tw*0.6; ctx.fillRect(x,y,2,2);
-  }
-  ctx.globalAlpha=1;
+  for(let i=0;i<5;i++){ const x=((i*220+t*0.2)%(VW+200))-100, y=20+i*14;
+    ctx.beginPath(); ctx.ellipse(x,y,40,12,0,0,7); ctx.fill(); }
 }
-
-/* skyline estilo Recoleta/BA: edificios, torre alta, aguja de iglesia */
-function drawSkyline(){
-  const base=H*0.5;
-  // árboles oscuros de fondo
-  ctx.fillStyle='#101a22';
-  for(let i=0;i<8;i++){
-    const x=80+i*120; const h=70+((i*53)%60);
-    ctx.beginPath();
-    ctx.moveTo(x, base);
-    ctx.lineTo(x-22, base-h*0.4);
-    ctx.lineTo(x-10, base-h*0.4);
-    ctx.lineTo(x-26, base-h);
-    ctx.lineTo(x+26, base-h);
-    ctx.lineTo(x+10, base-h*0.4);
-    ctx.lineTo(x+22, base-h*0.4);
-    ctx.closePath(); ctx.fill();
-  }
-  // edificios
-  const blds=[
-    [30,150,'#2c3147'],[95,110,'#262b40'],[150,180,'#30354c'],
-    [560,90,'#262b40'],[630,120,'#2c3147'],[760,150,'#30354c'],[850,100,'#262b40']
-  ];
-  blds.forEach(([x,h,c])=>{
-    ctx.fillStyle=c; ctx.fillRect(x,base-h,72,h);
-    // ventanitas amarillas
-    for(let wy=base-h+10; wy<base-8; wy+=16){
-      for(let wx=x+8; wx<x+64; wx+=16){
-        if((Math.floor(wx*0.3+wy*0.7))%3===0){
-          ctx.fillStyle='rgba(255,214,120,'+(0.5+0.4*Math.sin(wx+wy))+')';
-          ctx.fillRect(wx,wy,6,8);
-        }
-      }
-    }
-  });
-  // torre alta central (como la de la foto)
-  ctx.fillStyle='#41475f';
-  ctx.fillRect(420,base-230,46,230);
-  ctx.fillStyle='#535a76'; ctx.fillRect(420,base-230,46,18);
-  for(let wy=base-218; wy<base-10; wy+=14){
-    ctx.fillStyle='rgba(255,224,150,'+(0.3+0.5*Math.abs(Math.sin(wy)))+')';
-    ctx.fillRect(428,wy,30,6);
-  }
-  // aguja de iglesia
-  ctx.fillStyle='#3b4258';
-  ctx.fillRect(515,base-150,16,150);
-  ctx.beginPath(); ctx.moveTo(515,base-150); ctx.lineTo(523,base-185); ctx.lineTo(531,base-150); ctx.closePath(); ctx.fill();
-  // luz de la calle (glow)
-  const g=ctx.createRadialGradient(150,base-40,4,150,base-40,60);
-  g.addColorStop(0,'rgba(255,210,120,.6)'); g.addColorStop(1,'rgba(255,210,120,0)');
-  ctx.fillStyle=g; ctx.fillRect(90,base-100,120,120);
-}
-
-/* hojas colgando arriba (sauce, como la foto) */
-function drawHangingLeaves(){
-  ctx.strokeStyle='rgba(40,70,40,.85)'; ctx.lineWidth=2;
-  for(let i=0;i<26;i++){
-    const x=20+i*38; const len=30+((i*37)%70);
-    const sway=Math.sin(t*0.02+i)*6;
-    ctx.beginPath(); ctx.moveTo(x,0);
-    ctx.quadraticCurveTo(x+sway,len*0.5, x+sway*1.5,len); ctx.stroke();
-    ctx.fillStyle='rgba(60,100,55,.8)';
-    ctx.fillRect(x+sway*1.5-2,len-2,4,8);
+function drawDistantTrees(){
+  const base=VH*0.46;
+  for(let i=0;i<14;i++){
+    const x=i*(VW/13); const h=40+((i*53)%50);
+    ctx.fillStyle= i%2?'#6f9e5a':'#5f8e4f';
+    ctx.beginPath(); ctx.arc(x,base-h*0.5,h*0.6,0,7); ctx.fill();
+    ctx.fillStyle='#4f6d3e'; ctx.fillRect(x-3,base-h*0.5,6,h*0.6);
   }
 }
-
-/* piso de baldosas de la terraza */
-function drawFloor(){
-  const base=H*0.5;
-  ctx.fillStyle='#23252b'; ctx.fillRect(0,base,W,H-base);
-  ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=2;
-  for(let y=base+10;y<H;y+=40){
-    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-  }
-  for(let x=0;x<W;x+=80){
-    ctx.beginPath(); ctx.moveTo(x,base); ctx.lineTo(x,H); ctx.stroke();
-  }
-  // resplandor cálido de farol en el piso
-  const g=ctx.createRadialGradient(120,base+90,10,120,base+90,160);
-  g.addColorStop(0,'rgba(255,180,90,.25)'); g.addColorStop(1,'rgba(255,180,90,0)');
-  ctx.fillStyle=g; ctx.fillRect(0,base,300,260);
+function drawHill(){
+  // loma de pasto
+  const top=VH*0.42;
+  ctx.fillStyle='#7cae57';
+  ctx.beginPath(); ctx.moveTo(0,VH*0.66); ctx.quadraticCurveTo(VW*0.5,top,VW,VH*0.60); ctx.lineTo(VW,VH*0.72); ctx.lineTo(0,VH*0.78); ctx.closePath(); ctx.fill();
+  // manchas de pasto seco
+  ctx.fillStyle='#8a9a55';
+  for(let i=0;i<30;i++){ const x=(i*131)%VW, y=top+10+((i*71)%Math.round(VH*0.28));
+    ctx.fillRect(x,y,4,3); }
 }
-
-/* cantero/banco de cemento cuadrado + planta FRU verde */
-function drawPlanter(){
-  const b=benchZone;
-  // sombra
-  ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath();
-  ctx.ellipse(b.x+b.w/2,b.y+b.h+6,b.w*0.55,28,0,0,7); ctx.fill();
-  // cuerpo de cemento
-  ctx.fillStyle='#b9b2a4'; roundRect(b.x,b.y+30,b.w,b.h-20,14); ctx.fill();
-  ctx.fillStyle='#cfc8ba'; roundRect(b.x,b.y+18,b.w,30,12); ctx.fill(); // borde superior
+function drawIvyBack(){
+  // mancha de hiedra (ground cover) antes de la vereda
+  const y=VH*0.62;
+  ctx.fillStyle='#3f7a3a';
+  ctx.beginPath(); ctx.moveTo(0,y+8); ctx.quadraticCurveTo(VW*0.5,y-12,VW,y+4); ctx.lineTo(VW,y+26); ctx.lineTo(0,y+30); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#4f9146';
+  for(let i=0;i<60;i++){ const x=(i*97)%VW, yy=y-6+((i*37)%34);
+    ctx.beginPath(); ctx.arc(x,yy,2.2,0,7); ctx.fill(); }
+}
+function drawSidewalk(){
+  const top=VH*0.70, h=VH*0.16;
+  ctx.fillStyle='#c7c3b6'; ctx.fillRect(0,top,VW,h);
+  ctx.fillStyle='#b6b2a4';
+  for(let x=0;x<VW;x+=70){ ctx.fillRect(x,top,2,h); }
+  ctx.fillRect(0,top,VW,2);
+  ctx.fillStyle='#a7a395'; ctx.fillRect(0,top+h-3,VW,3); // cordón
+}
+function drawStreet(){
+  const top=VH*0.86;
+  ctx.fillStyle='#5f5f66'; ctx.fillRect(0,top,VW,VH-top);
   // textura
-  ctx.strokeStyle='rgba(120,114,100,.5)'; ctx.lineWidth=2;
-  for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(b.x+i*55,b.y+50);ctx.lineTo(b.x+i*55,b.y+b.h);ctx.stroke();}
-  // tierra
-  ctx.fillStyle='#3a2c20'; roundRect(b.x+14,b.y+20,b.w-28,22,8); ctx.fill();
-  // PLANTA FRU (hojas verdes tipo maple pero verde)
-  drawFruPlant(b.x+b.w*0.40, b.y+26);
-  drawFruPlant(b.x+b.w*0.62, b.y+24);
-  drawFruPlant(b.x+b.w*0.50, b.y+18);
-  // latita en el borde (guiño a la foto)
-  ctx.fillStyle='#e2c200'; ctx.fillRect(b.x+b.w*0.5-6,b.y+10,12,16);
-  ctx.fillStyle='#b9b2a4'; ctx.fillRect(b.x+b.w*0.5-6,b.y+8,12,4);
+  ctx.fillStyle='rgba(255,255,255,.06)';
+  for(let i=0;i<40;i++){ const x=(i*67)%VW; ctx.fillRect(x,top+6+((i*29)%14),5,2); }
+  // nombre de calle estilo Street View
+  ctx.save(); ctx.globalAlpha=.5; ctx.fillStyle='#e9e9ee';
+  ctx.font='bold 14px Trebuchet MS'; ctx.textAlign='left';
+  ctx.translate(VW*0.12,VH*0.95); ctx.rotate(-0.12); ctx.fillText('Juez Tedín',0,0); ctx.restore();
+  // un autito parado (guiño a las fotos)
+  drawCar(VW*0.80, top-4);
+}
+function drawCar(x,y){
+  ctx.fillStyle='#8d9298'; roundRect(x,y-18,72,18,5); ctx.fill();
+  ctx.fillStyle='#a7adb3'; roundRect(x+10,y-30,44,16,5); ctx.fill();
+  ctx.fillStyle='#33373c';
+  ctx.beginPath(); ctx.arc(x+16,y,7,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+56,y,7,0,7); ctx.fill();
+  ctx.fillStyle='#cdd3d8'; roundRect(x+14,y-27,16,10,2); ctx.fill(); roundRect(x+34,y-27,16,10,2); ctx.fill();
+}
+function drawLamp(x,y){
+  ctx.fillStyle='#1f4d2a'; ctx.fillRect(x-2,y-70,4,70);
+  ctx.fillStyle='#1f4d2a'; ctx.beginPath(); ctx.arc(x,y-72,5,0,7); ctx.fill();
+  ctx.fillStyle='#2c6b3a'; ctx.fillRect(x-7,y-2,14,4);
+}
+function drawBigTree(x,baseY){
+  // tronco grande
+  ctx.fillStyle='#5b4632';
+  ctx.beginPath(); ctx.moveTo(x-9,baseY); ctx.lineTo(x-5,baseY-90); ctx.lineTo(x+5,baseY-90); ctx.lineTo(x+10,baseY); ctx.closePath(); ctx.fill();
+  // ramas
+  ctx.strokeStyle='#5b4632'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(x,baseY-80); ctx.lineTo(x-40,baseY-120); ctx.moveTo(x,baseY-80); ctx.lineTo(x+50,baseY-110); ctx.stroke();
+}
+function drawCanopy(){
+  // follaje en primer plano arriba (sombra de copa, como en las fotos)
+  ctx.fillStyle='#4f7e3f';
+  for(let i=0;i<10;i++){ const x=VW*0.30 + Math.cos(i)*120 + i*8; const y=VH*0.16 + Math.sin(i*1.7)*30;
+    ctx.beginPath(); ctx.arc(x,y,46-(i%3)*6,0,7); ctx.fill(); }
+  ctx.fillStyle='#5e924b';
+  for(let i=0;i<8;i++){ const x=VW*0.34 + Math.cos(i*0.9)*130; const y=VH*0.12 + Math.sin(i)*26;
+    ctx.beginPath(); ctx.arc(x,y,34,0,7); ctx.fill(); }
+  // ramas finas que cuelgan
+  ctx.strokeStyle='rgba(60,90,50,.55)'; ctx.lineWidth=1.5;
+  for(let i=0;i<22;i++){ const x=10+i*(VW/22); const len=18+((i*31)%40); const sway=Math.sin(t*0.02+i)*5;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.quadraticCurveTo(x+sway,len*0.5,x+sway*1.4,len); ctx.stroke(); }
 }
 
-/* una hoja de maple VERDE */
-function drawMapleLeaf(cx,cy,s,sway){
-  ctx.save();
-  ctx.translate(cx,cy); ctx.rotate(sway);
-  ctx.fillStyle='#2fbf4f';
-  ctx.strokeStyle='#1d8a36'; ctx.lineWidth=1;
-  ctx.beginPath();
-  // forma estrellada tipo hoja de maple (canadiense) pero verde
+/* banco de cemento simple (losa + 2 patas) */
+function drawBench(){
+  const b=bench;
+  ctx.fillStyle='rgba(0,0,0,.18)';
+  ctx.beginPath(); ctx.ellipse(b.x+b.w/2,b.y+b.h+4,b.w*0.5,7,0,0,7); ctx.fill();
+  // patas
+  ctx.fillStyle='#a9a597';
+  ctx.fillRect(b.x+8,b.y+18,16,b.h-14);
+  ctx.fillRect(b.x+b.w-24,b.y+18,16,b.h-14);
+  // losa (asiento)
+  ctx.fillStyle='#cdc9bc'; roundRect(b.x,b.y+8,b.w,14,3); ctx.fill();
+  ctx.fillStyle='#bdb9ac'; ctx.fillRect(b.x,b.y+20,b.w,3);
+  // textura cemento
+  ctx.fillStyle='rgba(150,145,130,.4)';
+  for(let i=0;i<6;i++){ ctx.fillRect(b.x+6+i*18,b.y+10,1,10); }
+  // botellita en el banco (guiño foto)
+  ctx.fillStyle='rgba(180,210,230,.7)'; ctx.fillRect(b.x+10,b.y+1,4,8);
+  // brote de FRU al lado del banco
+  drawFruSprout(b.x-10,b.y+30);
+}
+
+/* hoja de maple VERDE */
+function mapleLeaf(cx,cy,s,rot){
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
+  ctx.fillStyle='#2fbf4f'; ctx.strokeStyle='#1d8a36'; ctx.lineWidth=1;
   const pts=[[0,-1],[0.18,-0.5],[0.55,-0.55],[0.32,-0.18],[0.7,0],[0.34,0.18],[0.45,0.6],[0.12,0.35],[0,0.85],
              [-0.12,0.35],[-0.45,0.6],[-0.34,0.18],[-0.7,0],[-0.32,-0.18],[-0.55,-0.55],[-0.18,-0.5]];
-  pts.forEach((p,i)=>{ const x=p[0]*s,y=p[1]*s; i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.beginPath(); pts.forEach((p,i)=>{const x=p[0]*s,y=p[1]*s;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
   ctx.closePath(); ctx.fill(); ctx.stroke();
-  // nervadura
-  ctx.strokeStyle='#1d8a36';
   ctx.beginPath(); ctx.moveTo(0,0.8*s); ctx.lineTo(0,-0.9*s); ctx.stroke();
   ctx.restore();
 }
-function drawFruPlant(x,y){
-  const sway=Math.sin(t*0.03+x)*0.08;
-  drawMapleLeaf(x,y-18,22,sway-0.5);
-  drawMapleLeaf(x-14,y-10,20,sway-0.1);
-  drawMapleLeaf(x+14,y-12,20,sway+0.4);
-  drawMapleLeaf(x,y-30,24,sway);
-  // tallo
-  ctx.strokeStyle='#1d8a36'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-18); ctx.stroke();
+function drawFruSprout(x,y){
+  const sway=Math.sin(t*0.04+x)*0.1;
+  ctx.strokeStyle='#1d8a36'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-10); ctx.stroke();
+  mapleLeaf(x,y-14,11,sway);
+  mapleLeaf(x-7,y-8,9,sway-0.4);
+  mapleLeaf(x+7,y-9,9,sway+0.4);
 }
 
 /* ---------- personajes ---------- */
-function drawShadow(x,y,w){
-  ctx.fillStyle='rgba(0,0,0,.3)';
-  ctx.beginPath(); ctx.ellipse(x,y,w,8,0,0,7); ctx.fill();
-}
-// Main character: pelo rulo, campera (rojo/azul como la foto), jeans
+function shadow(x,y,w){ ctx.fillStyle='rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(x,y,w,5,0,0,7); ctx.fill(); }
+
+// Main character: rulos, campera bordó/azul, jeans
 function drawPlayer(){
-  const x=player.x, y=player.y, f=player.facing;
-  drawShadow(x+player.w/2, y+player.h, 20);
-  const bob=Math.sin(player.walk)*2;
-  const legSwing=Math.sin(player.walk)*5;
-  ctx.save(); ctx.translate(x+player.w/2, y+bob);
-  if(f<0) ctx.scale(-1,1);
-  // piernas (jeans)
-  ctx.fillStyle='#3a5a8c';
-  ctx.fillRect(-10, 34, 8, 18+legSwing*0.4);
-  ctx.fillRect(2, 34, 8, 18-legSwing*0.4);
-  // zapatillas
-  ctx.fillStyle='#eee'; ctx.fillRect(-12,50+legSwing*0.4,11,6); ctx.fillRect(0,50-legSwing*0.4,11,6);
-  // torso campera (mitad bordó / mitad azul como la foto)
-  ctx.fillStyle='#5a2540'; roundRect(-12,8,24,28,6); ctx.fill();
-  ctx.fillStyle='#2b3a6b'; ctx.fillRect(-12,8,24,9);
-  ctx.fillStyle='#fff'; ctx.fillRect(-12,17,24,3); // raya blanca
-  // brazos
-  ctx.fillStyle='#5a2540'; ctx.fillRect(-15,12,5,18); ctx.fillRect(10,12,5,18);
-  // cabeza
-  ctx.fillStyle='#e7b58c'; ctx.beginPath(); ctx.arc(0,0,11,0,7); ctx.fill();
-  // pelo rulo
-  ctx.fillStyle='#241a14';
-  for(let i=0;i<7;i++){const a=Math.PI+i*Math.PI/6; ctx.beginPath();ctx.arc(Math.cos(a)*10,Math.sin(a)*9-4,5,0,7);ctx.fill();}
-  ctx.fillRect(-11,-12,22,8);
-  // carita
-  ctx.fillStyle='#241a14'; ctx.fillRect(3,-2,2,2); ctx.fillRect(-5,-2,2,2);
-  ctx.strokeStyle='#a06'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(0,3,3,0.1,Math.PI-0.1); ctx.stroke();
+  const x=player.x,y=player.y,f=player.facing;
+  shadow(x+player.w/2,y+player.h,13);
+  const bob=Math.sin(player.walk)*1.5, leg=Math.sin(player.walk)*4;
+  ctx.save(); ctx.translate(x+player.w/2,y+bob); if(f<0)ctx.scale(-1,1);
+  ctx.fillStyle='#3a5a8c'; ctx.fillRect(-7,25,6,13+leg*0.3); ctx.fillRect(1,25,6,13-leg*0.3);
+  ctx.fillStyle='#eee'; ctx.fillRect(-8,37+leg*0.3,8,4); ctx.fillRect(0,37-leg*0.3,8,4);
+  ctx.fillStyle='#5a2540'; roundRect(-9,6,18,21,4); ctx.fill();
+  ctx.fillStyle='#2b3a6b'; ctx.fillRect(-9,6,18,7);
+  ctx.fillStyle='#fff'; ctx.fillRect(-9,13,18,2);
+  ctx.fillStyle='#5a2540'; ctx.fillRect(-11,9,4,14); ctx.fillRect(7,9,4,14);
+  ctx.fillStyle='#e7b58c'; ctx.beginPath(); ctx.arc(0,0,8,0,7); ctx.fill();
+  ctx.fillStyle='#241a14'; for(let i=0;i<7;i++){const a=Math.PI+i*Math.PI/6; ctx.beginPath();ctx.arc(Math.cos(a)*7,Math.sin(a)*6-3,4,0,7);ctx.fill();}
+  ctx.fillRect(-8,-9,16,6);
+  ctx.fillStyle='#241a14'; ctx.fillRect(2,-1,2,2); ctx.fillRect(-4,-1,2,2);
   ctx.restore();
 }
-// FRU MAN: sentado en el banco, parecido (rulos), campera naranja (como la 1ª foto)
+// FRU MAN: sentado, rulos, campera NARANJA (1ª foto), remera negra
 function drawFruMan(){
-  const x=fruman.x, y=fruman.y;
-  ctx.save(); ctx.translate(x+fruman.w/2, y);
-  const breathe=Math.sin(t*0.05)*1.5;
-  // piernas sentadas
-  ctx.fillStyle='#2c4368'; ctx.fillRect(-12,30,10,8); ctx.fillRect(4,30,10,8);
-  ctx.fillRect(-14,36,14,9); ctx.fillRect(2,36,14,9);
-  // zapatillas
-  ctx.fillStyle='#222'; ctx.fillRect(-16,44,16,6); ctx.fillRect(2,44,16,6);
-  // torso campera NARANJA (como la foto del pibe de naranja)
-  ctx.fillStyle='#ef6a16'; roundRect(-13,4+breathe,26,30,6); ctx.fill();
-  ctx.fillStyle='#ff8a3d'; ctx.fillRect(-13,4+breathe,26,8);
-  ctx.fillStyle='#1a1a1a'; ctx.fillRect(-4,12+breathe,8,20); // remera negra adentro
-  // brazos relajados
-  ctx.fillStyle='#ef6a16'; ctx.fillRect(-16,8+breathe,5,20); ctx.fillRect(11,8+breathe,5,20);
-  // cabeza
-  ctx.fillStyle='#e0a87e'; ctx.beginPath(); ctx.arc(0,-4+breathe,11,0,7); ctx.fill();
-  // pelo rulo
-  ctx.fillStyle='#1c130d';
-  for(let i=0;i<7;i++){const a=Math.PI+i*Math.PI/6; ctx.beginPath();ctx.arc(Math.cos(a)*10,Math.sin(a)*9-8+breathe,5,0,7);ctx.fill();}
-  ctx.fillRect(-11,-16+breathe,22,8);
-  // carita sonrisa media
-  ctx.fillStyle='#1c130d'; ctx.fillRect(3,-6+breathe,2,2); ctx.fillRect(-5,-6+breathe,2,2);
-  ctx.strokeStyle='#7a3'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(0,-1+breathe,3,0.1,Math.PI-0.1); ctx.stroke();
+  const x=fruman.x,y=fruman.y;
+  ctx.save(); ctx.translate(x+fruman.w/2,y);
+  const br=Math.sin(t*0.05)*1;
+  ctx.fillStyle='#2c4368'; ctx.fillRect(-9,22,8,7); ctx.fillRect(2,22,8,7);
+  ctx.fillRect(-11,27,11,7); ctx.fillRect(2,27,11,7);
+  ctx.fillStyle='#222'; ctx.fillRect(-12,33,12,5); ctx.fillRect(2,33,12,5);
+  ctx.fillStyle='#ef6a16'; roundRect(-10,3+br,20,22,4); ctx.fill();
+  ctx.fillStyle='#ff8a3d'; ctx.fillRect(-10,3+br,20,6);
+  ctx.fillStyle='#1a1a1a'; ctx.fillRect(-3,9+br,7,15);
+  ctx.fillStyle='#ef6a16'; ctx.fillRect(-12,7+br,4,15); ctx.fillRect(8,7+br,4,15);
+  ctx.fillStyle='#e0a87e'; ctx.beginPath(); ctx.arc(0,-3+br,8,0,7); ctx.fill();
+  ctx.fillStyle='#1c130d'; for(let i=0;i<7;i++){const a=Math.PI+i*Math.PI/6; ctx.beginPath();ctx.arc(Math.cos(a)*7,Math.sin(a)*6-6+br,4,0,7);ctx.fill();}
+  ctx.fillRect(-8,-12+br,16,6);
+  ctx.fillStyle='#1c130d'; ctx.fillRect(2,-5+br,2,2); ctx.fillRect(-4,-5+br,2,2);
+  ctx.strokeStyle='#7a3'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(0,-1+br,2.5,0.1,Math.PI-0.1); ctx.stroke();
   ctx.restore();
-  // etiqueta flotante
   if(!state.talking){
-    ctx.fillStyle='rgba(0,0,0,.6)'; roundRect(x-14,y-46,fruman.w+28,18,6); ctx.fill();
-    ctx.fillStyle='#ffd56b'; ctx.font='bold 11px Trebuchet MS'; ctx.textAlign='center';
-    ctx.fillText('FRU MAN 🌿', x+fruman.w/2, y-33);
+    ctx.fillStyle='rgba(0,0,0,.55)'; roundRect(x-12,y-32,fruman.w+24,15,5); ctx.fill();
+    ctx.fillStyle='#ffd56b'; ctx.font='bold 10px Trebuchet MS'; ctx.textAlign='center';
+    ctx.fillText('FRU MAN 🌿', x+fruman.w/2, y-21);
   }
 }
-
 function drawPrompt(){
   if(state.started && !state.talking && shopEl.style.display!=='flex' && nearFruMan()){
-    const x=player.x+player.w/2, y=player.y-22;
+    const x=player.x+player.w/2, y=player.y-14;
     const pulse=0.6+0.4*Math.sin(t*0.12);
-    ctx.fillStyle='rgba(8,12,24,'+ (0.7) +')'; roundRect(x-92,y-16,184,26,8); ctx.fill();
-    ctx.globalAlpha=pulse; ctx.fillStyle='#2fbf4f'; ctx.font='bold 13px Trebuchet MS'; ctx.textAlign='center';
-    ctx.fillText('E / ESPACIO · preguntá por FRU', x, y+1);
-    ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(8,12,24,.7)'; roundRect(x-78,y-13,156,20,6); ctx.fill();
+    ctx.globalAlpha=pulse; ctx.fillStyle='#2fbf4f'; ctx.font='bold 11px Trebuchet MS'; ctx.textAlign='center';
+    ctx.fillText('E / ESPACIO · preguntá por FRU', x, y+1); ctx.globalAlpha=1;
   }
 }
-
-/* util */
-function roundRect(x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
-}
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
 /* =========================================================================
-   HUD + banderita Argentina dibujada
+   HUD / banderita / icono FRU
    ========================================================================= */
-function drawFlag(canvasOrDiv){ /* placeholder */ }
 function makeFlag(el){
   el.style.background='linear-gradient(#75AADB 0 33%,#fff 33% 66%,#75AADB 66% 100%)';
   el.style.position='relative';
-  const sun=document.createElement('div');
-  sun.textContent='☀';
+  const sun=document.createElement('div'); sun.textContent='☀';
   sun.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#f4c430;font-size:11px;';
   el.appendChild(sun);
 }
@@ -710,44 +593,35 @@ function updateHud(){
   document.getElementById('cash').textContent='$ '+state.cash.toLocaleString('es-AR');
   document.getElementById('fruCount').textContent=state.fru;
 }
-
-/* icono de hoja FRU en el shop */
-(()=>{
-  const lc=document.getElementById('leafIcon'), lx=lc.getContext('2d');
-  function leaf(){
-    lx.clearRect(0,0,46,46);
-    lx.save(); lx.translate(23,24);
-    lx.fillStyle='#2fbf4f'; lx.strokeStyle='#1d8a36'; lx.lineWidth=1.2;
-    const s=20;
-    const pts=[[0,-1],[0.18,-0.5],[0.55,-0.55],[0.32,-0.18],[0.7,0],[0.34,0.18],[0.45,0.6],[0.12,0.35],[0,0.85],
-               [-0.12,0.35],[-0.45,0.6],[-0.34,0.18],[-0.7,0],[-0.32,-0.18],[-0.55,-0.55],[-0.18,-0.5]];
-    lx.beginPath(); pts.forEach((p,i)=>{const x=p[0]*s,y=p[1]*s;i?lx.lineTo(x,y):lx.moveTo(x,y);});
-    lx.closePath(); lx.fill(); lx.stroke();
-    lx.beginPath(); lx.moveTo(0,0.8*s); lx.lineTo(0,-0.9*s); lx.stroke();
-    lx.restore();
-  }
-  leaf();
+(()=>{ const lc=document.getElementById('leafIcon'), lx=lc.getContext('2d');
+  lx.save(); lx.translate(23,24); lx.fillStyle='#2fbf4f'; lx.strokeStyle='#1d8a36'; lx.lineWidth=1.2;
+  const s=20, pts=[[0,-1],[0.18,-0.5],[0.55,-0.55],[0.32,-0.18],[0.7,0],[0.34,0.18],[0.45,0.6],[0.12,0.35],[0,0.85],
+    [-0.12,0.35],[-0.45,0.6],[-0.34,0.18],[-0.7,0],[-0.32,-0.18],[-0.55,-0.55],[-0.18,-0.5]];
+  lx.beginPath(); pts.forEach((p,i)=>{const x=p[0]*s,y=p[1]*s;i?lx.lineTo(x,y):lx.moveTo(x,y);});
+  lx.closePath(); lx.fill(); lx.stroke();
+  lx.beginPath(); lx.moveTo(0,0.8*s); lx.lineTo(0,-0.9*s); lx.stroke(); lx.restore();
 })();
 
 /* =========================================================================
-   LOOP + START
+   FULLSCREEN
+   ========================================================================= */
+function toggleFs(){
+  if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen||(()=>{})).call(document.documentElement); }
+  else { (document.exitFullscreen||document.webkitExitFullscreen||(()=>{})).call(document); }
+}
+document.getElementById('fsBtn').onclick=toggleFs;
+
+/* =========================================================================
+   LOOP / START
    ========================================================================= */
 function loop(){ update(); draw(); requestAnimationFrame(loop); }
-loop();
-updateHud();
+fit(); updateHud(); loop();
 
 document.getElementById('playBtn').onclick=()=>{
-  Audio.init();
-  state.started=true;
+  AudioFX.init();
+  state.started=true; layout();
   document.getElementById('start').style.display='none';
 };
-
-/* resize: mantener aspecto */
-function fit(){
-  const r=Math.min(window.innerWidth/W, window.innerHeight/H);
-  cv.style.width=(W*r)+'px'; cv.style.height=(H*r)+'px';
-}
-addEventListener('resize',fit); fit();
 </script>
 </body>
 </html>
